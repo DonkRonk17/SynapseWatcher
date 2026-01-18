@@ -1,0 +1,19 @@
+# SYNAPSEWATCHER CHEAT SHEET
+
+## CLI COMMANDS
+
+# Basic watch
+python synapsewatcher.py
+
+# Filter by recipient
+python synapsewatcher.py --to ATLAS
+
+# Filter by priority
+python synapsewatcher.py --priority HIGH
+
+# Filter by keywords
+python synapsewatcher.py --keywords "urgent,critical"
+
+# Combine filters
+python synapsewatcher.py --to CLIO --priority CRITICAL
+
