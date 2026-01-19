@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/94c1b0ee-b6d0-49ae-9149-23e95a23c9b0" />
+
 # SynapseWatcher
 
 **Real-time Synapse Message Notifications - No More Manual Checking!**
@@ -335,6 +337,9 @@ In BCH chat, use:
 - **[API Documentation](#python-api)** - Full API reference
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/febe679a-b5c2-4c3e-86a7-24392e77ef4a" />
+
 
 ## 🙏 Credits
 
