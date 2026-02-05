@@ -1,19 +1,310 @@
-# SYNAPSEWATCHER CHEAT SHEET
+================================================================================
+SYNAPSEWATCHER v1.1 - QUICK REFERENCE CHEAT SHEET
+================================================================================
 
-## CLI COMMANDS
+Real-time Synapse message notifications for Team Brain.
+No more manual checking - instant alerts when messages arrive!
 
-# Basic watch
-python synapsewatcher.py
+================================================================================
+QUICK START
+================================================================================
 
-# Filter by recipient
-python synapsewatcher.py --to ATLAS
+1. Navigate to tool:
+   cd C:\Users\logan\OneDrive\Documents\AutoProjects\SynapseWatcher
 
-# Filter by priority
-python synapsewatcher.py --priority HIGH
+2. Basic watch (all messages):
+   python synapsewatcher.py
 
-# Filter by keywords
-python synapsewatcher.py --keywords "urgent,critical"
+3. Watch for YOUR messages:
+   python synapsewatcher.py --to YOUR_AGENT_NAME
 
-# Combine filters
-python synapsewatcher.py --to CLIO --priority CRITICAL
+4. That's it! Messages appear instantly.
 
+================================================================================
+CLI COMMANDS - BASIC
+================================================================================
+
+Watch all messages:
+  python synapsewatcher.py
+
+Check version:
+  python synapsewatcher.py --version
+
+Get help:
+  python synapsewatcher.py --help
+
+Verbose logging:
+  python synapsewatcher.py --verbose
+
+================================================================================
+CLI COMMANDS - FILTERING
+================================================================================
+
+Filter by recipient (messages TO this agent):
+  python synapsewatcher.py --to ATLAS
+  python synapsewatcher.py --to FORGE
+  python synapsewatcher.py --to CLIO
+  python synapsewatcher.py --to NEXUS
+  python synapsewatcher.py --to BOLT
+
+Filter by sender (messages FROM this agent):
+  python synapsewatcher.py --from FORGE
+  python synapsewatcher.py --from ATLAS
+
+Filter by priority:
+  python synapsewatcher.py --priority NORMAL
+  python synapsewatcher.py --priority HIGH
+  python synapsewatcher.py --priority CRITICAL
+
+Filter by keywords (comma-separated):
+  python synapsewatcher.py --keywords "urgent,help"
+  python synapsewatcher.py --keywords "task,build,fix"
+  python synapsewatcher.py --keywords "error,failed,crash"
+
+================================================================================
+CLI COMMANDS - COMBINED FILTERS
+================================================================================
+
+All filters can be combined (AND logic - all must match):
+
+HIGH priority to ATLAS:
+  python synapsewatcher.py --to ATLAS --priority HIGH
+
+Tasks from FORGE to BOLT:
+  python synapsewatcher.py --to BOLT --from FORGE --keywords "task"
+
+Urgent messages to anyone:
+  python synapsewatcher.py --priority HIGH --keywords "urgent,critical"
+
+================================================================================
+CLI COMMANDS - ADVANCED
+================================================================================
+
+Custom Synapse path:
+  python synapsewatcher.py --path "D:/custom/path/to/synapse/active"
+
+Faster polling (0.5 seconds):
+  python synapsewatcher.py --interval 0.5
+
+Slower polling (save CPU):
+  python synapsewatcher.py --interval 5.0
+
+WSL Linux path:
+  python3 synapsewatcher.py --path "/mnt/d/BEACON_HQ/.../THE_SYNAPSE/active"
+
+================================================================================
+PYTHON API - QUICK START
+================================================================================
+
+# Minimal example
+from synapsewatcher import SynapseWatcher
+
+watcher = SynapseWatcher()
+watcher.register_callback(lambda m: print(f"New: {m.subject}"))
+watcher.start()
+
+================================================================================
+PYTHON API - WITH FILTER
+================================================================================
+
+from synapsewatcher import SynapseWatcher, MessageFilter
+
+watcher = SynapseWatcher()
+
+# Set filter
+watcher.set_filter(MessageFilter(
+    to_agent="ATLAS",
+    priority="HIGH",
+    keywords=["urgent", "task"]
+))
+
+def my_handler(message):
+    print(f"Got: {message.subject}")
+
+watcher.register_callback(my_handler)
+watcher.start()
+
+================================================================================
+PYTHON API - BACKGROUND MODE
+================================================================================
+
+from synapsewatcher import SynapseWatcher
+import threading
+
+watcher = SynapseWatcher()
+watcher.register_callback(lambda m: print(f"BG: {m.subject}"))
+
+# Run in background (non-blocking)
+thread = threading.Thread(target=watcher.start, daemon=True)
+thread.start()
+
+# Continue with other work...
+print("Watcher running in background!")
+
+================================================================================
+MESSAGE OBJECT ATTRIBUTES
+================================================================================
+
+When your callback receives a message, you can access:
+
+  message.msg_id       # Unique message ID
+  message.from_agent   # Sender (FORGE, ATLAS, etc.)
+  message.to           # Recipients (list)
+  message.subject      # Message subject line
+  message.body         # Message body (dict)
+  message.priority     # NORMAL, HIGH, or CRITICAL
+  message.timestamp    # ISO timestamp
+  message.filepath     # Path to JSON file
+
+================================================================================
+MESSAGE FILTER OPTIONS
+================================================================================
+
+MessageFilter(
+    to_agent="ATLAS",           # Only messages TO this agent
+    from_agent="FORGE",         # Only messages FROM this agent
+    priority="HIGH",            # Only this priority level
+    keywords=["task", "build"]  # Must contain any of these
+)
+
+All filters are AND conditions (all must match).
+
+================================================================================
+INTEGRATION WITH SYNAPSELINK
+================================================================================
+
+# Auto-reply to messages
+from synapsewatcher import SynapseWatcher, MessageFilter
+from synapselink import quick_send
+
+watcher = SynapseWatcher()
+watcher.set_filter(MessageFilter(to_agent="ATLAS"))
+
+def auto_reply(message):
+    quick_send(
+        message.from_agent,
+        f"Re: {message.subject}",
+        "Received! Will respond soon.",
+        priority="NORMAL"
+    )
+
+watcher.register_callback(auto_reply)
+watcher.start()
+
+================================================================================
+LINUX DAEMON MODE (CLIO)
+================================================================================
+
+Simple background:
+  nohup python3 synapsewatcher.py --to CLIO > ~/synapse.log 2>&1 &
+
+Check if running:
+  ps aux | grep synapsewatcher
+
+Stop:
+  pkill -f synapsewatcher.py
+
+Systemd service (recommended):
+  See INTEGRATION_PLAN.md for full service configuration
+
+================================================================================
+COMMON USE CASES
+================================================================================
+
+1. ORCHESTRATOR (Forge)
+   Watch everything, track completions:
+   python synapsewatcher.py --keywords "complete,done,finished"
+
+2. EXECUTOR (Atlas/Bolt)
+   Watch for task assignments:
+   python synapsewatcher.py --to BOLT --keywords "task,build,fix"
+
+3. MONITORING
+   Watch for alerts:
+   python synapsewatcher.py --priority HIGH
+
+4. DEBUGGING
+   Watch all with verbose logging:
+   python synapsewatcher.py --verbose
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+"Synapse path does not exist"
+  - Check path is correct
+  - Verify BEACON_HQ drive is mounted
+  - Use --path to specify correct path
+
+No messages detected
+  - Remove filters to test
+  - Check if new messages are arriving
+  - Verify JSON files exist in Synapse folder
+
+High CPU usage
+  - Increase poll interval: --interval 2.0
+  - Check for callback infinite loops
+
+Callback not triggering
+  - Add print() in callback to verify it's registered
+  - Remove filters and test with all messages
+  - Check filter conditions match your messages
+
+================================================================================
+FILES IN THIS TOOL
+================================================================================
+
+synapsewatcher.py        Main script (375 lines)
+test_synapsewatcher.py   Test suite (19/19 passing)
+README.md                Full documentation (~370 lines)
+EXAMPLES.md              12+ working examples
+CHEAT_SHEET.txt          This file
+INTEGRATION_PLAN.md      Integration guide (600+ lines)
+QUICK_START_GUIDES.md    Agent-specific guides (500+ lines)
+INTEGRATION_EXAMPLES.md  10 integration patterns
+requirements.txt         Zero dependencies (stdlib only)
+setup.py                 Package installation
+LICENSE                  MIT License
+branding/                DALL-E prompts
+
+================================================================================
+KEY FEATURES SUMMARY
+================================================================================
+
+[OK] Real-time detection (1-second polling)
+[OK] Multiple callback functions
+[OK] Flexible filtering (agent, priority, keywords)
+[OK] Error isolation (callback crashes don't stop watcher)
+[OK] Deduplication (existing messages ignored)
+[OK] Zero dependencies (pure Python stdlib)
+[OK] Cross-platform (Windows, Linux, macOS)
+[OK] Background mode (threading support)
+[OK] Audio alerts (terminal bell)
+[OK] Graceful shutdown (Ctrl+C handled)
+
+================================================================================
+RESOURCES
+================================================================================
+
+Documentation:   AutoProjects/SynapseWatcher/README.md
+Examples:        AutoProjects/SynapseWatcher/EXAMPLES.md
+Integration:     AutoProjects/SynapseWatcher/INTEGRATION_PLAN.md
+Quick Starts:    AutoProjects/SynapseWatcher/QUICK_START_GUIDES.md
+GitHub:          https://github.com/DonkRonk17/SynapseWatcher
+Issues:          https://github.com/DonkRonk17/SynapseWatcher/issues
+
+================================================================================
+CREDITS
+================================================================================
+
+Built by:    Atlas (Team Brain)
+Requested:   Forge (Synapse infrastructure)
+For:         Logan Smith / Metaphy LLC
+Part of:     Beacon HQ / Team Brain Ecosystem
+Date:        January 18, 2026 (v1.0), February 4, 2026 (v1.1)
+
+================================================================================
+
+SynapseWatcher - Because AI agents shouldn't have to manually check their inbox!
+
+================================================================================

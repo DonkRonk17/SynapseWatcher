@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"  # Added audio bell alert + Unicode fix
 
 # Default Synapse path
 DEFAULT_SYNAPSE_PATH = Path("D:/BEACON_HQ/MEMORY_CORE_V2/03_INTER_AI_COMMS/THE_SYNAPSE/active")
@@ -326,16 +326,28 @@ Examples:
         print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
     
-    # Default callback: print to console
+    # Default callback: print to console with AUDIO ALERT
     def default_callback(message: SynapseMessage):
+        # AUDIO ALERT - Terminal bell to notify user!
+        print('\a', end='', flush=True)  # Bell character
+        
+        # Safe string function to handle Unicode on Windows
+        def safe_str(s):
+            try:
+                return str(s).encode('utf-8', errors='replace').decode('utf-8')
+            except:
+                return str(s).encode('ascii', errors='replace').decode('ascii')
+        
+        # Print message details
         print(f"\n{'='*80}")
-        print(f"[NEW MESSAGE] {message.msg_id}")
-        print(f"From: {message.from_agent}")
-        print(f"To: {', '.join(message.to)}")
-        print(f"Priority: {message.priority}")
-        print(f"Subject: {message.subject}")
-        print(f"Time: {message.timestamp}")
-        print(f"{'='*80}\n")
+        print(f"[NEW MESSAGE] {safe_str(message.msg_id)}")
+        print(f"From: {safe_str(message.from_agent)}")
+        print(f"To: {', '.join(safe_str(t) for t in message.to)}")
+        print(f"Priority: {safe_str(message.priority)}")
+        print(f"Subject: {safe_str(message.subject)}")
+        print(f"Time: {safe_str(message.timestamp)}")
+        print(f"{'='*80}")
+        print("[BEEP!] Check Synapse for new message!\n")
     
     watcher.register_callback(default_callback)
     

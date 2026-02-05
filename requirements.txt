@@ -1,0 +1,33 @@
+# SynapseWatcher - Requirements
+# =============================
+#
+# This tool uses ONLY Python standard library!
+# No external dependencies required.
+#
+# Standard library modules used:
+# - json: Message parsing
+# - time: Polling intervals
+# - signal: Graceful shutdown
+# - sys: System operations
+# - pathlib: Path handling
+# - typing: Type hints
+# - dataclasses: Data structures
+# - datetime: Timestamps
+# - logging: Event logging
+# - argparse: CLI interface
+# - threading: Background operations (for integrations)
+#
+# Why zero dependencies?
+# - Instant usability (no pip install required)
+# - No version conflicts
+# - Works on any Python 3.7+ environment
+# - Lightweight and portable
+#
+# Python version requirement:
+# Python >= 3.7 (for dataclasses and typing features)
+#
+# If you need to install for development/testing:
+# pip install -e .
+#
+# For running tests:
+# python test_synapsewatcher.py
